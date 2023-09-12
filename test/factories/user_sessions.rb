@@ -15,4 +15,13 @@ FactoryBot.define do
     session_start { 1.week.before(now) }
     session_end { now }
   end
+
+  trait :backdate do
+    transient do
+      backdate_interval { 1.week }
+    end
+
+    session_start { backdate_interval.before(now) }
+    session_end { 1.week.after(session_start) }
+  end
 end
