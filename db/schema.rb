@@ -33,7 +33,7 @@ ActiveRecord::Schema.define(version: 2023_09_12_205734) do
 
   create_table "user_behavior_trackings", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.uuid "user_session_id", null: false
-    t.bigint "user_behavior_tracking_events_id", null: false
+    t.bigint "user_behavior_tracking_event_id", null: false
     t.string "browser"
     t.string "device"
     t.string "os"
@@ -43,7 +43,7 @@ ActiveRecord::Schema.define(version: 2023_09_12_205734) do
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.index ["trackable_type", "trackable_id"], name: "index_user_behavior_trackings_on_trackable"
-    t.index ["user_behavior_tracking_events_id"], name: "index_user_behavior_trackings_on_tracking_events_id"
+    t.index ["user_behavior_tracking_event_id"], name: "index_user_behavior_trackings_on_tracking_events_id"
     t.index ["user_session_id"], name: "index_user_behavior_trackings_on_user_session_id"
   end
 
@@ -64,7 +64,7 @@ ActiveRecord::Schema.define(version: 2023_09_12_205734) do
   end
 
   add_foreign_key "contributions", "users"
-  add_foreign_key "user_behavior_trackings", "user_behavior_tracking_events", column: "user_behavior_tracking_events_id"
+  add_foreign_key "user_behavior_trackings", "user_behavior_tracking_events"
   add_foreign_key "user_behavior_trackings", "user_sessions"
   add_foreign_key "user_sessions", "users"
 end
