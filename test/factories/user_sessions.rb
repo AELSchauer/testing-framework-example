@@ -7,6 +7,8 @@ FactoryBot.define do
     user { create(:user) }
     session_start { now }
     session_end { 1.week.after(now) }
+    created_at { session_start }
+    updated_at { session_start }
   end
 
   trait :backdate_1_week do
