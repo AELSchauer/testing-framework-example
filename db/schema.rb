@@ -32,7 +32,7 @@ ActiveRecord::Schema.define(version: 2023_09_12_205734) do
   end
 
   create_table "user_behavior_trackings", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
-    t.bigint "user_session_id", null: false
+    t.uuid "user_session_id", null: false
     t.bigint "user_behavior_tracking_events_id", null: false
     t.string "browser"
     t.string "device"
@@ -47,8 +47,7 @@ ActiveRecord::Schema.define(version: 2023_09_12_205734) do
     t.index ["user_session_id"], name: "index_user_behavior_trackings_on_user_session_id"
   end
 
-  create_table "user_sessions", force: :cascade do |t|
-    t.string "uuid"
+  create_table "user_sessions", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.bigint "user_id", null: false
     t.datetime "session_start"
     t.datetime "session_end"
@@ -59,6 +58,7 @@ ActiveRecord::Schema.define(version: 2023_09_12_205734) do
 
   create_table "users", force: :cascade do |t|
     t.string "email"
+    t.string "name"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
   end
