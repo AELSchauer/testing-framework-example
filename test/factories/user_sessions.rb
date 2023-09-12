@@ -11,11 +11,6 @@ FactoryBot.define do
     updated_at { session_start }
   end
 
-  trait :backdate_1_week do
-    session_start { 1.week.before(now) }
-    session_end { now }
-  end
-
   trait :backdate do
     transient do
       backdate_interval { 1.week }

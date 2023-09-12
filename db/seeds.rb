@@ -47,11 +47,13 @@ user_session = FactoryBot.create(:user_session, :backdate, user: user)
 now = DateTime.now
 UserBehaviorTracking.create(user_session: user_session, user_behavior_tracking_event: visit_tracking_event, created_at: 2.days.before(now), metadata: { url: "/campaigns/1234/donations/new" })
 UserBehaviorTracking.create(user_session: user_session, user_behavior_tracking_event: donation_tracking_event, created_at: now, trackable: Contribution.create(user: user, amount: 2000))
-backdate_interval = 1.month.ago
+backdate_interval = 1.month
 user_session = FactoryBot.create(:user_session, :backdate, user: user, backdate_interval: backdate_interval)
-UserBehaviorTracking.create(user_session: user_session, user_behavior_tracking_event: visit_tracking_event, created_at: 2.days.before(backdate_interval), metadata: { url: "/campaigns/1234/donations/new" })
-UserBehaviorTracking.create(user_session: user_session, user_behavior_tracking_event: donation_tracking_event, created_at: backdate_interval, trackable: Contribution.create(user: user, amount: 2000))
-backdate_interval = 3.months.ago
+donation_created_at = 2.days.after(backdate_interval.ago)
+UserBehaviorTracking.create(user_session: user_session, user_behavior_tracking_event: visit_tracking_event, created_at: 5.minutes.before(donation_created_at), metadata: { url: "/campaigns/1234/donations/new" })
+UserBehaviorTracking.create(user_session: user_session, user_behavior_tracking_event: donation_tracking_event, created_at: donation_created_at, trackable: Contribution.create(user: user, amount: 2000))
+backdate_interval = 3.months
+donation_created_at = 2.days.after(backdate_interval.ago)
 user_session = FactoryBot.create(:user_session, :backdate, user: user, backdate_interval: backdate_interval)
-UserBehaviorTracking.create(user_session: user_session, user_behavior_tracking_event: visit_tracking_event, created_at: 2.days.before(backdate_interval), metadata: { url: "/campaigns/1234/donations/new" })
-UserBehaviorTracking.create(user_session: user_session, user_behavior_tracking_event: donation_tracking_event, created_at: backdate_interval, trackable: Contribution.create(user: user, amount: 2000))
+UserBehaviorTracking.create(user_session: user_session, user_behavior_tracking_event: visit_tracking_event, created_at: 5.minutes.before(donation_created_at), metadata: { url: "/campaigns/1234/donations/new" })
+UserBehaviorTracking.create(user_session: user_session, user_behavior_tracking_event: donation_tracking_event, created_at: donation_created_at, trackable: Contribution.create(user: user, amount: 2000))
