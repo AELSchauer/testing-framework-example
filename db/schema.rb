@@ -24,16 +24,9 @@ ActiveRecord::Schema.define(version: 2023_09_13_203310) do
     t.index ["user_id"], name: "index_contributions_on_user_id"
   end
 
-  create_table "user_behavior_tracking_events", force: :cascade do |t|
-    t.string "name"
-    t.string "description"
-    t.datetime "created_at", precision: 6, null: false
-    t.datetime "updated_at", precision: 6, null: false
-  end
-
   create_table "user_behavior_trackings", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.uuid "user_session_id", null: false
-    t.bigint "user_behavior_tracking_event_id", null: false
+    t.string "event_name"
     t.string "browser"
     t.string "device"
     t.string "os"
@@ -42,8 +35,8 @@ ActiveRecord::Schema.define(version: 2023_09_13_203310) do
     t.string "trackable_id"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
+    t.index ["event_name"], name: "index_user_behavior_trackings_on_event_name"
     t.index ["trackable_type", "trackable_id"], name: "index_user_behavior_trackings_on_trackable"
-    t.index ["user_behavior_tracking_event_id"], name: "index_user_behavior_trackings_on_tracking_events_id"
     t.index ["user_session_id"], name: "index_user_behavior_trackings_on_user_session_id"
   end
 
@@ -64,7 +57,6 @@ ActiveRecord::Schema.define(version: 2023_09_13_203310) do
   end
 
   add_foreign_key "contributions", "users"
-  add_foreign_key "user_behavior_trackings", "user_behavior_tracking_events"
   add_foreign_key "user_behavior_trackings", "user_sessions"
   add_foreign_key "user_sessions", "users"
 
@@ -73,13 +65,13 @@ ActiveRecord::Schema.define(version: 2023_09_13_203310) do
       (ubt_main.metadata #>> '{url}'::text[]) AS url,
       ( SELECT count(ubt_sub.user_session_id) AS count
              FROM user_behavior_trackings ubt_sub
-            WHERE ((ubt_sub.user_behavior_tracking_event_id = '1'::bigint) AND ((ubt_sub.metadata ->> 'url'::text) = (ubt_main.metadata #>> '{url}'::text[])) AND (ubt_sub.user_session_id = ubt_main.user_session_id))
+            WHERE (((ubt_sub.event_name)::text = 'visit_donation_page'::text) AND ((ubt_sub.metadata ->> 'url'::text) = (ubt_main.metadata #>> '{url}'::text[])) AND (ubt_sub.user_session_id = ubt_main.user_session_id))
             GROUP BY ubt_sub.user_session_id) AS num_page_visits,
       COALESCE(( SELECT count(ubt_sub.user_session_id) AS count
              FROM user_behavior_trackings ubt_sub
-            WHERE ((ubt_sub.user_behavior_tracking_event_id = '2'::bigint) AND ((ubt_sub.metadata ->> 'url'::text) = (ubt_main.metadata #>> '{url}'::text[])) AND (ubt_sub.user_session_id = ubt_main.user_session_id))
+            WHERE (((ubt_sub.event_name)::text = 'create_donation'::text) AND ((ubt_sub.metadata ->> 'url'::text) = (ubt_main.metadata #>> '{url}'::text[])) AND (ubt_sub.user_session_id = ubt_main.user_session_id))
             GROUP BY ubt_sub.user_session_id), (0)::bigint) AS num_contributions
      FROM user_behavior_trackings ubt_main
-    WHERE (ubt_main.user_behavior_tracking_event_id = ANY (ARRAY['1'::bigint, '2'::bigint]));
+    WHERE ((ubt_main.event_name)::text = ANY ((ARRAY['visit_donation_page'::character varying, 'create_donation'::character varying])::text[]));
   SQL
 end

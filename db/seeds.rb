@@ -6,54 +6,54 @@
 #   movies = Movie.create([{ name: "Star Wars" }, { name: "Lord of the Rings" }])
 #   Character.create(name: "Luke", movie: movies.first)
 
-visit_tracking_event = UserBehaviorTrackingEvent.create(name: "Visit Donation Page")
-donation_tracking_event = UserBehaviorTrackingEvent.create(name: "Create Donation")
+visit_tracking_event = :visit_donation_page
+donation_tracking_event = :create_donation
 
 
 user = FactoryBot.create(:user, name: "User who makes contribution on first page visit")
 user_session = FactoryBot.create(:user_session, :backdate, user: user)
 now = DateTime.now
-UserBehaviorTracking.create(user_session: user_session, user_behavior_tracking_event: visit_tracking_event, created_at: 5.minutes.before(now), metadata: { url: "/campaigns/1234/donations/new" })
-UserBehaviorTracking.create(user_session: user_session, user_behavior_tracking_event: donation_tracking_event, created_at: now, metadata: { url: "/campaigns/1234/donations/new" }, trackable: Contribution.create(user: user, amount: 2000))
+UserBehaviorTracking.create(user_session: user_session, event_name: visit_tracking_event, created_at: 5.minutes.before(now), metadata: { url: "/campaigns/1234/donations/new" })
+UserBehaviorTracking.create(user_session: user_session, event_name: donation_tracking_event, created_at: now, metadata: { url: "/campaigns/1234/donations/new" }, trackable: Contribution.create(user: user, amount: 2000))
 
 user = FactoryBot.create(:user, name: "User who makes contribution on second page visit")
 user_session = FactoryBot.create(:user_session, :backdate, user: user)
 now = DateTime.now
-UserBehaviorTracking.create(user_session: user_session, user_behavior_tracking_event: visit_tracking_event, created_at: 2.days.before(now), metadata: { url: "/campaigns/1234/donations/new" })
-UserBehaviorTracking.create(user_session: user_session, user_behavior_tracking_event: visit_tracking_event, created_at: 5.minutes.before(now), metadata: { url: "/campaigns/1234/donations/new" })
-UserBehaviorTracking.create(user_session: user_session, user_behavior_tracking_event: donation_tracking_event, created_at: now, metadata: { url: "/campaigns/1234/donations/new" }, trackable: Contribution.create(user: user, amount: 2000))
+UserBehaviorTracking.create(user_session: user_session, event_name: visit_tracking_event, created_at: 2.days.before(now), metadata: { url: "/campaigns/1234/donations/new" })
+UserBehaviorTracking.create(user_session: user_session, event_name: visit_tracking_event, created_at: 5.minutes.before(now), metadata: { url: "/campaigns/1234/donations/new" })
+UserBehaviorTracking.create(user_session: user_session, event_name: donation_tracking_event, created_at: now, metadata: { url: "/campaigns/1234/donations/new" }, trackable: Contribution.create(user: user, amount: 2000))
 
 user = FactoryBot.create(:user, name: "User who makes multiple contributions within 1 week")
 user_session = FactoryBot.create(:user_session, :backdate, user: user)
 now = DateTime.now
-UserBehaviorTracking.create(user_session: user_session, user_behavior_tracking_event: visit_tracking_event, created_at: 2.days.before(now), metadata: { url: "/campaigns/1234/donations/new" })
-UserBehaviorTracking.create(user_session: user_session, user_behavior_tracking_event: donation_tracking_event, created_at: 5.minutes.after(2.days.before(now)), metadata: { url: "/campaigns/1234/donations/new" }, trackable: Contribution.create(user: user, amount: 2000))
-UserBehaviorTracking.create(user_session: user_session, user_behavior_tracking_event: visit_tracking_event, created_at: 5.minutes.before(now), metadata: { url: "/campaigns/5678/donations/new" })
-UserBehaviorTracking.create(user_session: user_session, user_behavior_tracking_event: donation_tracking_event, created_at: now, metadata: { url: "/campaigns/5678/donations/new" }, trackable: Contribution.create(user: user, amount: 2000))
+UserBehaviorTracking.create(user_session: user_session, event_name: visit_tracking_event, created_at: 2.days.before(now), metadata: { url: "/campaigns/1234/donations/new" })
+UserBehaviorTracking.create(user_session: user_session, event_name: donation_tracking_event, created_at: 5.minutes.after(2.days.before(now)), metadata: { url: "/campaigns/1234/donations/new" }, trackable: Contribution.create(user: user, amount: 2000))
+UserBehaviorTracking.create(user_session: user_session, event_name: visit_tracking_event, created_at: 5.minutes.before(now), metadata: { url: "/campaigns/5678/donations/new" })
+UserBehaviorTracking.create(user_session: user_session, event_name: donation_tracking_event, created_at: now, metadata: { url: "/campaigns/5678/donations/new" }, trackable: Contribution.create(user: user, amount: 2000))
 
 user = FactoryBot.create(:user, name: "User who visits once and doesn't make a contribution")
 user_session = FactoryBot.create(:user_session, :backdate, user: user)
 now = DateTime.now
-UserBehaviorTracking.create(user_session: user_session, user_behavior_tracking_event: visit_tracking_event, created_at: 2.days.before(now), metadata: { url: "/campaigns/1234/donations/new" })
+UserBehaviorTracking.create(user_session: user_session, event_name: visit_tracking_event, created_at: 2.days.before(now), metadata: { url: "/campaigns/1234/donations/new" })
 
 user = FactoryBot.create(:user, name: "User who visits multiple times and doesn't make a contribution")
 user_session = FactoryBot.create(:user_session, :backdate, user: user)
 now = DateTime.now
-UserBehaviorTracking.create(user_session: user_session, user_behavior_tracking_event: visit_tracking_event, created_at: 2.days.before(now), metadata: { url: "/campaigns/1234/donations/new" })
-UserBehaviorTracking.create(user_session: user_session, user_behavior_tracking_event: visit_tracking_event, created_at: 5.days.before(now), metadata: { url: "/campaigns/1234/donations/new" })
+UserBehaviorTracking.create(user_session: user_session, event_name: visit_tracking_event, created_at: 2.days.before(now), metadata: { url: "/campaigns/1234/donations/new" })
+UserBehaviorTracking.create(user_session: user_session, event_name: visit_tracking_event, created_at: 5.days.before(now), metadata: { url: "/campaigns/1234/donations/new" })
 
 user = FactoryBot.create(:user, name: "User who makes multiple contributions over multiple sessions")
 user_session = FactoryBot.create(:user_session, :backdate, user: user)
 now = DateTime.now
-UserBehaviorTracking.create(user_session: user_session, user_behavior_tracking_event: visit_tracking_event, created_at: 2.days.before(now), metadata: { url: "/campaigns/1234/donations/new" })
-UserBehaviorTracking.create(user_session: user_session, user_behavior_tracking_event: donation_tracking_event, created_at: now, metadata: { url: "/campaigns/1234/donations/new" }, trackable: Contribution.create(user: user, amount: 2000))
+UserBehaviorTracking.create(user_session: user_session, event_name: visit_tracking_event, created_at: 2.days.before(now), metadata: { url: "/campaigns/1234/donations/new" })
+UserBehaviorTracking.create(user_session: user_session, event_name: donation_tracking_event, created_at: now, metadata: { url: "/campaigns/1234/donations/new" }, trackable: Contribution.create(user: user, amount: 2000))
 backdate_interval = 1.month
 user_session = FactoryBot.create(:user_session, :backdate, user: user, backdate_interval: backdate_interval)
 donation_created_at = 2.days.after(backdate_interval.ago)
-UserBehaviorTracking.create(user_session: user_session, user_behavior_tracking_event: visit_tracking_event, created_at: 5.minutes.before(donation_created_at), metadata: { url: "/campaigns/1234/donations/new" })
-UserBehaviorTracking.create(user_session: user_session, user_behavior_tracking_event: donation_tracking_event, created_at: donation_created_at, metadata: { url: "/campaigns/1234/donations/new" }, trackable: Contribution.create(user: user, amount: 2000))
+UserBehaviorTracking.create(user_session: user_session, event_name: visit_tracking_event, created_at: 5.minutes.before(donation_created_at), metadata: { url: "/campaigns/1234/donations/new" })
+UserBehaviorTracking.create(user_session: user_session, event_name: donation_tracking_event, created_at: donation_created_at, metadata: { url: "/campaigns/1234/donations/new" }, trackable: Contribution.create(user: user, amount: 2000))
 backdate_interval = 3.months
 donation_created_at = 2.days.after(backdate_interval.ago)
 user_session = FactoryBot.create(:user_session, :backdate, user: user, backdate_interval: backdate_interval)
-UserBehaviorTracking.create(user_session: user_session, user_behavior_tracking_event: visit_tracking_event, created_at: 5.minutes.before(donation_created_at), metadata: { url: "/campaigns/1234/donations/new" })
-UserBehaviorTracking.create(user_session: user_session, user_behavior_tracking_event: donation_tracking_event, created_at: donation_created_at, metadata: { url: "/campaigns/1234/donations/new" }, trackable: Contribution.create(user: user, amount: 2000))
+UserBehaviorTracking.create(user_session: user_session, event_name: visit_tracking_event, created_at: 5.minutes.before(donation_created_at), metadata: { url: "/campaigns/1234/donations/new" })
+UserBehaviorTracking.create(user_session: user_session, event_name: donation_tracking_event, created_at: donation_created_at, metadata: { url: "/campaigns/1234/donations/new" }, trackable: Contribution.create(user: user, amount: 2000))
