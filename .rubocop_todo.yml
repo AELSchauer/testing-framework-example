@@ -78,16 +78,7 @@ Style/ClassAndModuleChildren:
 # Offense count: 7
 # Configuration parameters: AllowedConstants.
 Style/Documentation:
-  Exclude:
-    - 'spec/**/*'
-    - 'test/**/*'
-    - 'app/helpers/application_helper.rb'
-    - 'config/application.rb'
-    - 'db/migrate/20230912204522_create_users.rb'
-    - 'db/migrate/20230912204658_create_contributions.rb'
-    - 'db/migrate/20230912204721_create_user_behavior_tracking_events.rb'
-    - 'db/migrate/20230912204740_create_user_sessions.rb'
-    - 'db/migrate/20230912205734_create_user_behavior_trackings.rb'
+  Enabled: false
 
 # Offense count: 41
 # This cop supports unsafe autocorrection (--autocorrect-all).
