@@ -24,35 +24,6 @@ ActiveRecord::Schema.define(version: 2023_09_13_203310) do
     t.index ["user_id"], name: "index_contributions_on_user_id"
   end
 
-  create_table "explore_exploit_test_variants", force: :cascade do |t|
-    t.bigint "explore_exploit_test_id", null: false
-    t.string "key"
-    t.string "description"
-    t.jsonb "metadata"
-    t.datetime "deleted_at"
-    t.datetime "created_at", precision: 6, null: false
-    t.datetime "updated_at", precision: 6, null: false
-    t.index ["explore_exploit_test_id"], name: "index_explore_exploit_test_variants_on_explore_exploit_test_id"
-  end
-
-  create_table "explore_exploit_testables", force: :cascade do |t|
-    t.string "testable_type"
-    t.string "testable_id"
-    t.bigint "explore_exploit_test_variant_id", null: false
-    t.datetime "created_at", precision: 6, null: false
-    t.datetime "updated_at", precision: 6, null: false
-    t.index ["explore_exploit_test_variant_id"], name: "index_explore_exploit_testables_on_variant_id"
-    t.index ["testable_type", "testable_id"], name: "index_explore_exploit_testables_on_testable"
-  end
-
-  create_table "explore_exploit_tests", force: :cascade do |t|
-    t.string "key"
-    t.string "description"
-    t.datetime "deleted_at"
-    t.datetime "created_at", precision: 6, null: false
-    t.datetime "updated_at", precision: 6, null: false
-  end
-
   create_table "user_behavior_tracking_events", force: :cascade do |t|
     t.string "name"
     t.string "description"
@@ -78,8 +49,8 @@ ActiveRecord::Schema.define(version: 2023_09_13_203310) do
 
   create_table "user_sessions", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.bigint "user_id", null: false
-    t.datetime "session_start", precision: 6
-    t.datetime "session_end", precision: 6
+    t.datetime "session_start"
+    t.datetime "session_end"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.index ["user_id"], name: "index_user_sessions_on_user_id"
@@ -93,8 +64,6 @@ ActiveRecord::Schema.define(version: 2023_09_13_203310) do
   end
 
   add_foreign_key "contributions", "users"
-  add_foreign_key "explore_exploit_test_variants", "explore_exploit_tests"
-  add_foreign_key "explore_exploit_testables", "explore_exploit_test_variants"
   add_foreign_key "user_behavior_trackings", "user_behavior_tracking_events"
   add_foreign_key "user_behavior_trackings", "user_sessions"
   add_foreign_key "user_sessions", "users"
