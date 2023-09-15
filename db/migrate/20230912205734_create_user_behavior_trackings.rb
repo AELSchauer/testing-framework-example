@@ -3,7 +3,7 @@ class CreateUserBehaviorTrackings < ActiveRecord::Migration[7.0]
     enable_extension 'pgcrypto' unless extension_enabled?('pgcrypto')
 
     create_table :user_behavior_trackings, id: :uuid, default: 'gen_random_uuid()' do |t|
-      t.references :user_session, null: false, foreign_key: true, type: :uuid
+      t.references :user_session, null: true, foreign_key: true, type: :uuid
       t.string :event_name, index: true
       t.string :browser
       t.string :device

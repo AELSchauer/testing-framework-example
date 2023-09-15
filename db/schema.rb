@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2023_09_13_203310) do
+ActiveRecord::Schema.define(version: 2023_09_15_200445) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
@@ -21,11 +21,18 @@ ActiveRecord::Schema.define(version: 2023_09_13_203310) do
     t.integer "amount"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
+    t.bigint "project_id", null: false
+    t.index ["project_id"], name: "index_contributions_on_project_id"
     t.index ["user_id"], name: "index_contributions_on_user_id"
   end
 
+  create_table "projects", force: :cascade do |t|
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+  end
+
   create_table "user_behavior_trackings", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
-    t.uuid "user_session_id", null: false
+    t.uuid "user_session_id"
     t.string "event_name"
     t.string "browser"
     t.string "device"
@@ -56,6 +63,7 @@ ActiveRecord::Schema.define(version: 2023_09_13_203310) do
     t.datetime "updated_at", precision: 6, null: false
   end
 
+  add_foreign_key "contributions", "projects"
   add_foreign_key "contributions", "users"
   add_foreign_key "user_behavior_trackings", "user_sessions"
   add_foreign_key "user_sessions", "users"
