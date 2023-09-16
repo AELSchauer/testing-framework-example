@@ -1,6 +1,6 @@
 class ContributionsController < ApplicationController
   def new
-    start_test
+    @dcpp = ab_test(:dcpp)
     @contribution = Contribution.new
   end
 
@@ -24,7 +24,7 @@ class ContributionsController < ApplicationController
   def update
     @contribution = Contribution.find(params[:id])
     @contribution.update(paid: true)
-    finish_test
+    ab_finished(:dcpp, reset: true)
     redirect_to project_contribution_path(project_id: params[:project_id], id: @contribution.id)
   end
 
@@ -34,14 +34,13 @@ class ContributionsController < ApplicationController
     { amount: params[:amount], project_id: params[:project_id] }
   end
 
-  def start_test
-    @dcpp = ab_test(:dcpp)
-    UserBehaviorTracking.create(event_name: :visit_donation_page, metadata: { session_id: session["session_id"], split_tests: { dcpp: @dcpp }})
+  # This is a hook for Split gem. https://github.com/splitrb/split
+  def log_trial(trial)
+    UserBehaviorTracking.create(event_name: :visit_donation_page, metadata: { current_user: current_user.id, session_id: session["session_id"], split_tests: { trial.experiment.name => { variant: trial.alternative.name, version: trial.experiment.version } } })
   end
 
-  def finish_test
-    @dcpp = ab_user[:dcpp]
-    ab_finished(:dcpp, reset: true)
-    UserBehaviorTracking.create(event_name: :create_donation, metadata: { session_id: session["session_id"], split_tests: { dcpp: @dcpp }})
+  # This is a hook for Split gem. https://github.com/splitrb/split
+  def log_trial_complete(trial)
+    UserBehaviorTracking.create(event_name: :create_donation, metadata: { current_user: current_user.id, session_id: session["session_id"], split_tests: { trial.experiment.name => { variant: trial.alternative.name, version: trial.experiment.version } } })
   end
 end

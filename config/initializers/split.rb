@@ -10,9 +10,11 @@ Split.configure do |config|
     dcpp: {
       alternatives: [
         { name: "show", percent: 50 },
-        { name: "hide", percent: 50 }
+        { name: "hide", percent: 50, control: true }
       ],
       resettable: true
     }
   }
+  config.on_trial = :log_trial
+  config.on_trial_complete = :log_trial_complete
 end
