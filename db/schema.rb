@@ -17,8 +17,9 @@ ActiveRecord::Schema.define(version: 2023_09_15_200445) do
   enable_extension "plpgsql"
 
   create_table "contributions", force: :cascade do |t|
-    t.bigint "user_id", null: false
+    t.bigint "user_id"
     t.integer "amount"
+    t.boolean "paid"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.bigint "project_id", null: false

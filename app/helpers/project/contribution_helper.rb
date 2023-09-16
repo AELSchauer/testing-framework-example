@@ -1,0 +1,2 @@
+module Project::ContributionHelper
+end

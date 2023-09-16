@@ -9,7 +9,6 @@
 visit_tracking_event = :visit_donation_page
 donation_tracking_event = :create_donation
 
-
 user = FactoryBot.create(:user, name: "User who makes contribution on first page visit")
 user_session = FactoryBot.create(:user_session, :backdate, user: user)
 now = DateTime.now
@@ -57,3 +56,7 @@ donation_created_at = 2.days.after(backdate_interval.ago)
 user_session = FactoryBot.create(:user_session, :backdate, user: user, backdate_interval: backdate_interval)
 UserBehaviorTracking.create(user_session: user_session, event_name: visit_tracking_event, created_at: 5.minutes.before(donation_created_at), metadata: { url: "/campaigns/1234/donations/new" })
 UserBehaviorTracking.create(user_session: user_session, event_name: donation_tracking_event, created_at: donation_created_at, metadata: { url: "/campaigns/1234/donations/new" }, trackable: Contribution.create(user: user, amount: 2000))
+
+##########
+
+Project.create

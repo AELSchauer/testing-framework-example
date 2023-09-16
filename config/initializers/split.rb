@@ -6,6 +6,13 @@ Split.configure do |config|
         { name: "Create Your FREE Account!", percent: 50 }
       ],
       resettable: true
+    },
+    dcpp: {
+      alternatives: [
+        { name: "show", percent: 50 },
+        { name: "hide", percent: 50 }
+      ],
+      resettable: true
     }
   }
 end

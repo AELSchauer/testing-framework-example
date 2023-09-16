@@ -1,0 +1,12 @@
+<div class="row">
+  <div class="col-md-4 offset-4">
+    <%= form_with(url: project_contribution_path, method: :put, local: true) do |f| %>
+      <%= render 'shared/error_messages', record: @contribution %>
+
+      <%= f.label :credit_card_proxy %>
+      <%= f.number_field :credit_card_proxy, class: 'mb-1 form-control' %>
+
+      <%= f.submit "Donate", class: "mt-2 btn btn-primary" %>
+    <% end %>
+  </div>
+</div>

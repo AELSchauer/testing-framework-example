@@ -11,5 +11,9 @@ Rails.application.routes.draw do
   post   '/login',   to: 'sessions#create'
   delete '/logout',  to: 'sessions#destroy'
 
+  resources :projects do
+    resources :contributions, only: [:new, :create, :show, :edit, :update]
+  end
+
   mount Split::Dashboard, at: 'split'
 end
