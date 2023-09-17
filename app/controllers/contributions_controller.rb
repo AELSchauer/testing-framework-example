@@ -36,11 +36,37 @@ class ContributionsController < ApplicationController
 
   # This is a hook for Split gem. https://github.com/splitrb/split
   def log_trial(trial)
-    UserBehaviorTracking.create(event_name: :visit_donation_page, metadata: { current_user: current_user.id, session_id: session["session_id"], split_tests: { trial.experiment.name => { variant: trial.alternative.name, version: trial.experiment.version } } })
+    UserBehaviorTracking.create(event_name: :visit_donation_page, metadata: { project_id: params[:project_id], current_user: current_user&.id, session_id: session["session_id"], split_tests: { trial.experiment.name => { variant: trial.alternative.name, version: trial.experiment.version } } })
+    create_ab_test_contribution_conversion(trial)
   end
 
   # This is a hook for Split gem. https://github.com/splitrb/split
   def log_trial_complete(trial)
-    UserBehaviorTracking.create(event_name: :create_donation, metadata: { current_user: current_user.id, session_id: session["session_id"], split_tests: { trial.experiment.name => { variant: trial.alternative.name, version: trial.experiment.version } } })
+    UserBehaviorTracking.create(event_name: :create_donation, metadata: { project_id: params[:project_id], current_user: current_user&.id, session_id: session["session_id"], split_tests: { trial.experiment.name => { variant: trial.alternative.name, version: trial.experiment.version } } })
+    complete_ab_test_contribution_conversion(trial)
+  end
+
+  def create_ab_test_contribution_conversion(trial)
+    AbTestContributionConversion.create!(
+      user: current_user,
+      session_id: session["session_id"],
+      project_id: params[:project_id],
+      ab_test_name: trial.experiment.name,
+      ab_test_variant: trial.alternative.name,
+      ab_test_version: trial.experiment.version,
+      status: "unfulfilled"
+    )
+  end
+
+  def complete_ab_test_contribution_conversion(trial)
+    abtcc = AbTestContributionConversion
+      .where(session_id: session["session_id"], project_id: params[:project_id])
+      .where(ab_test_name: trial.experiment.name, ab_test_variant: trial.alternative.name, ab_test_version: trial.experiment.version)
+      .unfulfilled
+      .not_expired
+      .matches_user_or_no_user(current_user)
+      .latest
+      .first
+    abtcc.update(user: current_user, contribution: @contribution, status: "fulfilled")
   end
 end
