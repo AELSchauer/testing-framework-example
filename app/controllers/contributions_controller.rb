@@ -47,30 +47,47 @@ class ContributionsController < ApplicationController
   end
 
   def create_ab_test_contribution_conversion(trial)
-    abtcc = AbTestContributionConversion.find_or_initialize_by(
-      user: current_user,
-      session_id: session["session_id"],
-      project_id: params[:project_id],
-      ab_test_name: trial.experiment.name,
-      ab_test_variant: trial.alternative.name,
-      ab_test_version: trial.experiment.version,
-      status: "unfulfilled"
-    )
+    abtcc = find_ab_test_contribution_conversion(trial)
 
-    abtcc.metadata = { page_views: [] } if abtcc.new_record?
-    abtcc.metadata["page_views"] << 1
+    if abtcc.blank?
+      abtcc = AbTestContributionConversion.new(
+        user: current_user,
+        session_id: session["session_id"],
+        project_id: params[:project_id],
+        ab_test_name: trial.experiment.name,
+        ab_test_variant: trial.alternative.name,
+        ab_test_version: trial.experiment.version,
+        status: "unfulfilled",
+        metadata: { page_views: [] }
+      )
+    elsif abtcc.user.blank?
+      abtcc.user = current_user
+    end
+
+    abtcc.metadata["page_views"] << Time.now
     abtcc.save!
   end
 
   def complete_ab_test_contribution_conversion(trial)
-    abtcc = AbTestContributionConversion
-      .where(session_id: session["session_id"], project_id: params[:project_id])
+    abtcc = find_ab_test_contribution_conversion(trial)
+
+    abtcc.assign_attributes(contribution: @contribution, status: "fulfilled")
+    abtcc.assign_attributes(user: current_user) if current_user.present?
+    abtcc.save!
+  end
+
+  def find_ab_test_contribution_conversion(trial)
+    abtcc = if current_user.present? 
+      AbTestContributionConversion.matches_user_or_no_user(current_user)
+    else
+      AbTestContributionConversion
+    end
+
+    abtcc.where(session_id: session["session_id"], project_id: params[:project_id])
       .where(ab_test_name: trial.experiment.name, ab_test_variant: trial.alternative.name, ab_test_version: trial.experiment.version)
       .unfulfilled
       .not_expired
-      .matches_user_or_no_user(current_user)
       .latest
       .first
-    abtcc.update(user: current_user, contribution: @contribution, status: "fulfilled")
   end
 end
