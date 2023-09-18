@@ -3,8 +3,8 @@ class AbTestContributionConversion < ApplicationRecord
   belongs_to :user, optional: true
   belongs_to :project
 
-  scope :matches_user_or_no_user, ->(user) { where(user_id: [nil, user&.id].compact) }
+  scope :matches_user_or_no_user, ->(user) { where(user_id: [nil, user&.id]) }
   scope :latest, -> { order(updated_at: :desc) }
   scope :not_expired, -> { where("created_at >= ?", 1.week.ago) }
-  scope :unfulfilled, -> { where("unfulfilled") }
+  scope :unfulfilled, -> { where(status: "unfulfilled") }
 end

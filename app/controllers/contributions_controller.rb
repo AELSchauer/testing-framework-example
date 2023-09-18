@@ -47,7 +47,7 @@ class ContributionsController < ApplicationController
   end
 
   def create_ab_test_contribution_conversion(trial)
-    AbTestContributionConversion.create!(
+    abtcc = AbTestContributionConversion.find_or_initialize_by(
       user: current_user,
       session_id: session["session_id"],
       project_id: params[:project_id],
@@ -56,6 +56,10 @@ class ContributionsController < ApplicationController
       ab_test_version: trial.experiment.version,
       status: "unfulfilled"
     )
+
+    abtcc.metadata = { page_views: [] } if abtcc.new_record?
+    abtcc.metadata["page_views"] << 1
+    abtcc.save!
   end
 
   def complete_ab_test_contribution_conversion(trial)
