@@ -182,7 +182,7 @@ feature "Conversion Metrics" do
     abtcc_1 = create(:ab_test_contribution_conversion, :unfulfilled, :backdate, user: user, project: project, backdate_interval: 2.week)
 
     visit login_path
-    fill_in "session[email]", with: user_1.email
+    fill_in "session[email]", with: user.email
     click_on "Sign in"
 
     visit new_project_contribution_path(project_id: project.id)
@@ -193,7 +193,7 @@ feature "Conversion Metrics" do
 
     abtcc_2 = AbTestContributionConversion.last
     expect(abtcc_2).to_not eq(abtcc_1)
-    expect(abtcc_2.user).to eq(user_2)
+    expect(abtcc_2.user).to eq(user)
     expect(abtcc_2.metadata["page_views"].count).to eq(1)
     expect(abtcc_2.status).to eq("fulfilled")
   end

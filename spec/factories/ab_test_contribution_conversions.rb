@@ -16,6 +16,7 @@ FactoryBot.define do
     trait :backdate do
       transient do
         backdate_interval { 1.week }
+        now { Time.now }
       end
 
       created_at { backdate_interval.before(now) }

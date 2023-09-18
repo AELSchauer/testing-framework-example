@@ -1,9 +1,10 @@
 example_id                                      | status | run_time        |
 ----------------------------------------------- | ------ | --------------- |
-./spec/features/conversion_metrics_spec.rb[1:1] | passed | 0.01567 seconds |
-./spec/features/conversion_metrics_spec.rb[1:2] | passed | 0.0308 seconds  |
-./spec/features/conversion_metrics_spec.rb[1:3] | passed | 0.03218 seconds |
-./spec/features/conversion_metrics_spec.rb[1:4] | passed | 0.04916 seconds |
-./spec/features/conversion_metrics_spec.rb[1:5] | passed | 0.05322 seconds |
-./spec/features/conversion_metrics_spec.rb[1:6] | passed | 0.71543 seconds |
-./spec/features/conversion_metrics_spec.rb[1:7] | passed | 0.06101 seconds |
+./spec/features/conversion_metrics_spec.rb[1:1] | passed | 0.01476 seconds |
+./spec/features/conversion_metrics_spec.rb[1:2] | passed | 0.03127 seconds |
+./spec/features/conversion_metrics_spec.rb[1:3] | passed | 0.05049 seconds |
+./spec/features/conversion_metrics_spec.rb[1:4] | passed | 0.04642 seconds |
+./spec/features/conversion_metrics_spec.rb[1:5] | passed | 0.71793 seconds |
+./spec/features/conversion_metrics_spec.rb[1:6] | passed | 0.06723 seconds |
+./spec/features/conversion_metrics_spec.rb[1:7] | passed | 0.08288 seconds |
+./spec/features/conversion_metrics_spec.rb[1:8] | passed | 0.04566 seconds |
