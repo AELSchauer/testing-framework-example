@@ -36,13 +36,13 @@ class ContributionsController < ApplicationController
 
   # This is a hook for Split gem. https://github.com/splitrb/split
   def log_trial(trial)
-    UserBehaviorTracking.create(event_name: :visit_donation_page, metadata: { project_id: params[:project_id], current_user: current_user&.id, session_id: session["session_id"], split_tests: { trial.experiment.name => { variant: trial.alternative.name, version: trial.experiment.version } } })
+    UserBehaviorTracking.create(event_name: :visit_donation_page, metadata: { project_id: params[:project_id], current_user: current_user&.id, session_id: session[:split][:id], split_tests: { trial.experiment.name => { variant: trial.alternative.name, version: trial.experiment.version } } })
     create_ab_test_contribution_conversion(trial)
   end
 
   # This is a hook for Split gem. https://github.com/splitrb/split
   def log_trial_complete(trial)
-    UserBehaviorTracking.create(event_name: :create_donation, metadata: { project_id: params[:project_id], current_user: current_user&.id, session_id: session["session_id"], split_tests: { trial.experiment.name => { variant: trial.alternative.name, version: trial.experiment.version } } })
+    UserBehaviorTracking.create(event_name: :create_donation, metadata: { project_id: params[:project_id], current_user: current_user&.id, session_id: session[:split][:id], split_tests: { trial.experiment.name => { variant: trial.alternative.name, version: trial.experiment.version } } })
     complete_ab_test_contribution_conversion(trial)
   end
 
@@ -52,7 +52,7 @@ class ContributionsController < ApplicationController
     if abtcc.blank?
       abtcc = AbTestContributionConversion.new(
         user: current_user,
-        session_id: session["session_id"],
+        session_id: session[:split][:id],
         project_id: params[:project_id],
         ab_test_name: trial.experiment.name,
         ab_test_variant: trial.alternative.name,
@@ -83,11 +83,11 @@ class ContributionsController < ApplicationController
       AbTestContributionConversion
     end
 
-    abtcc.where(session_id: session["session_id"], project_id: params[:project_id])
-      .where(ab_test_name: trial.experiment.name, ab_test_variant: trial.alternative.name, ab_test_version: trial.experiment.version)
-      .unfulfilled
-      .not_expired
-      .latest
-      .first
+    abtcc.where(session_id: session[:split][:id], project_id: params[:project_id])
+         .where(ab_test_name: trial.experiment.name, ab_test_variant: trial.alternative.name, ab_test_version: trial.experiment.version)
+         .unfulfilled
+         .not_expired
+         .latest
+         .first
   end
 end

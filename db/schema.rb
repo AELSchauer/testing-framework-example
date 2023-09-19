@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2023_09_16_213838) do
+ActiveRecord::Schema.define(version: 2023_09_19_211722) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
@@ -79,6 +79,8 @@ ActiveRecord::Schema.define(version: 2023_09_16_213838) do
     t.string "name"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
+    t.string "encrypted_password", default: "", null: false
+    t.datetime "remember_created_at", precision: 6
   end
 
   add_foreign_key "ab_test_contribution_conversions", "contributions"

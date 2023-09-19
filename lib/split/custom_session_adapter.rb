@@ -4,27 +4,19 @@ module Split
   class CustomSessionAdapter
     def initialize(context)
       @session = context.session
-      @session[:split] = if @session.dig(:split, :expires_at).blank? || @session.dig(:split, :expires_at) >= Time.now
-                           @session[:split][:experiments]
-                         else
-                           { id: SecureRandom.hex(16), expires_at: Time.now + 7.days, experiments: {} }
-                         end
-    end
-
-    def id
-      @session[:split][:id]
-    end
-
-    def expires_at
-      @session[:split][:expires_at]
+      @session[:split][:experiments] ||= {}
     end
 
     def [](key)
+      # debugger
       @session[:split][:experiments][key]
     end
 
     def []=(key, value)
-      @session[:split][:experiments][key] = value
+      split = @session[:split]
+      split[:experiments][key] = value
+      # debugger
+      @session[:split] = split
     end
 
     def delete(key)
@@ -32,6 +24,7 @@ module Split
     end
 
     def keys
+      # debugger
       @session[:split][:experiments].keys
     end
   end

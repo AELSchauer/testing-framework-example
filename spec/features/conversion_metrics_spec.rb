@@ -91,8 +91,9 @@ feature "Conversion Metrics" do
     expect(abtcc.status).to eq("unfulfilled")
 
     visit login_path
-    fill_in "session[email]", with: user.email
-    click_on "Sign in"
+    fill_in "user[email]", with: user.email
+    fill_in "user[password]", with: "Testing123%"
+    click_on "Log in"
 
     visit new_project_contribution_path(project_id: project.id)
 
@@ -113,8 +114,9 @@ feature "Conversion Metrics" do
     user = create(:user)
 
     visit login_path
-    fill_in "session[email]", with: user.email
-    click_on "Sign in"
+    fill_in "user[email]", with: user.email
+    fill_in "user[password]", with: "Testing123%"
+    click_on "Log in"
 
     visit new_project_contribution_path(project_id: project.id)
 
@@ -124,7 +126,7 @@ feature "Conversion Metrics" do
     expect(abtcc.metadata["page_views"].count).to eq(1)
     expect(abtcc.status).to eq("unfulfilled")
 
-    click_on "Log out"
+    click_on "Sign out"
 
     visit new_project_contribution_path(project_id: project.id)
 
@@ -146,8 +148,9 @@ feature "Conversion Metrics" do
     user_2 = create(:user)
 
     visit login_path
-    fill_in "session[email]", with: user_1.email
-    click_on "Sign in"
+    fill_in "user[email]", with: user_1.email
+    fill_in "user[password]", with: "Testing123%"
+    click_on "Log in"
 
     visit new_project_contribution_path(project_id: project.id)
 
@@ -157,11 +160,12 @@ feature "Conversion Metrics" do
     expect(abtcc_1.metadata["page_views"].count).to eq(1)
     expect(abtcc_1.status).to eq("unfulfilled")
 
-    click_on "Log out"
+    click_on "Sign out"
 
     visit login_path
-    fill_in "session[email]", with: user_2.email
-    click_on "Sign in"
+    fill_in "user[email]", with: user_2.email
+    fill_in "user[password]", with: "Testing123%"
+    click_on "Log in"
 
     visit new_project_contribution_path(project_id: project.id)
 
@@ -182,8 +186,9 @@ feature "Conversion Metrics" do
     abtcc_1 = create(:ab_test_contribution_conversion, :unfulfilled, :backdate, user: user, project: project, backdate_interval: 2.week)
 
     visit login_path
-    fill_in "session[email]", with: user.email
-    click_on "Sign in"
+    fill_in "user[email]", with: user.email
+    fill_in "user[password]", with: "Testing123%"
+    click_on "Log in"
 
     visit new_project_contribution_path(project_id: project.id)
 
