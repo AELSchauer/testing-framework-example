@@ -2,7 +2,7 @@ class ApplicationController < ActionController::Base
   include SessionsHelper
 
   before_action :current_user
-  before_action :current_user_session
+  # before_action :current_user_session
 
   private
 
@@ -14,13 +14,13 @@ class ApplicationController < ActionController::Base
     end
   end
 
-  def current_user_session
-    service = UserSessionValidationService.new(
-      current_user: current_user,
-      current_user_session: @current_user_session,
-      session_token: session[:_gc_user_session],
-      session: session
-    )
-    @current_user_session = service.retrieve_valid_session
-  end
+  # def current_user_session
+  #   service = UserSessionValidationService.new(
+  #     current_user: current_user,
+  #     current_user_session: @current_user_session,
+  #     session_token: session[:_gc_user_session],
+  #     session: session
+  #   )
+  #   @current_user_session = service.retrieve_valid_session
+  # end
 end

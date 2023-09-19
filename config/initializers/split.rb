@@ -1,6 +1,6 @@
 Rails.application.config.to_prepare do
   Split.configure do |config|
-    config.persistence = Split::CustomPersistenceAdapter
+    config.persistence = Split::CustomSessionAdapter
     config.experiments = {
       signup_header: {
         alternatives: [
