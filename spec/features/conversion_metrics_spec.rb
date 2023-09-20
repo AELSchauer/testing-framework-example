@@ -19,7 +19,6 @@ feature "Conversion Metrics" do
   scenario "Completes a donation" do
     project = create(:project)
 
-    # visit new_project_contribution_path(project_id: project.id, ab_test: { nudge: :show })
     visit new_project_contribution_path(project_id: project.id)
 
     fill_in "amount", with: "100"

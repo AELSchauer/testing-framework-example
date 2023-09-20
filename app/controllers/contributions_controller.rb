@@ -34,19 +34,23 @@ class ContributionsController < ApplicationController
     { amount: params[:amount], project_id: params[:project_id] }
   end
 
-  def select_from_conflicting_tests(conflicting_test_names)
+  def conflicting_test_names
+    YAML.load_file("config/experiments.yml").dig("conflicts", "contributions") || []
+  end
+
+  def select_from_conflicting_tests
     params[:ab_test]&.keys&.find { |k| conflicting_test_names.include?(k) } || 
       active_experiments.keys.find { |k| conflicting_test_names.include?(k) } || 
       conflicting_test_names.sample
   end
 
   def start_tests
-    selected_test_name = select_from_conflicting_tests(["dcpp", "nudge"])
+    selected_test_name = select_from_conflicting_tests
     instance_variable_set("@#{selected_test_name}", ab_test(selected_test_name))
   end
 
   def finish_tests
-    selected_test_name = select_from_conflicting_tests(["dcpp", "nudge"])
+    selected_test_name = select_from_conflicting_tests
     ab_finished(selected_test_name, reset: true)
   end
 
