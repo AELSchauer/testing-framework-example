@@ -1,6 +1,6 @@
 class ContributionsController < ApplicationController
   def new
-    @dcpp = ab_test(:dcpp)
+    start_tests
     @contribution = Contribution.new
   end
 
@@ -24,7 +24,7 @@ class ContributionsController < ApplicationController
   def update
     @contribution = Contribution.find(params[:id])
     @contribution.update(paid: true)
-    ab_finished(:dcpp, reset: true)
+    finish_tests
     redirect_to project_contribution_path(project_id: params[:project_id], id: @contribution.id)
   end
 
@@ -34,15 +34,29 @@ class ContributionsController < ApplicationController
     { amount: params[:amount], project_id: params[:project_id] }
   end
 
+  def select_from_conflicting_tests(conflicting_test_names)
+    params[:ab_test]&.keys&.find { |k| conflicting_test_names.include?(k) } || 
+      active_experiments.keys.find { |k| conflicting_test_names.include?(k) } || 
+      conflicting_test_names.sample
+  end
+
+  def start_tests
+    selected_test_name = select_from_conflicting_tests(["dcpp", "nudge"])
+    instance_variable_set("@#{selected_test_name}", ab_test(selected_test_name))
+  end
+
+  def finish_tests
+    selected_test_name = select_from_conflicting_tests(["dcpp", "nudge"])
+    ab_finished(selected_test_name, reset: true)
+  end
+
   # This is a hook for Split gem. https://github.com/splitrb/split
   def log_trial(trial)
-    UserBehaviorTracking.create(event_name: :visit_donation_page, metadata: { project_id: params[:project_id], current_user: current_user&.id, session_id: session["split"]["id"], split_tests: { trial.experiment.name => { variant: trial.alternative.name, version: trial.experiment.version } } })
     create_ab_test_contribution_conversion(trial)
   end
 
   # This is a hook for Split gem. https://github.com/splitrb/split
   def log_trial_complete(trial)
-    UserBehaviorTracking.create(event_name: :create_donation, metadata: { project_id: params[:project_id], current_user: current_user&.id, session_id: session["split"]["id"], split_tests: { trial.experiment.name => { variant: trial.alternative.name, version: trial.experiment.version } } })
     complete_ab_test_contribution_conversion(trial)
   end
 

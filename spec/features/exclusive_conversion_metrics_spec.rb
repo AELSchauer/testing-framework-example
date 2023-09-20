@@ -1,12 +1,16 @@
 require "rails_helper"
 
-feature "Conversion Metrics" do
+feature "Exclusive Conversion Metrics" do
   scenario "Starts a donation" do
     project = create(:project)
 
-    visit new_project_contribution_path(project_id: project.id)
+    visit new_project_contribution_path(project_id: project.id, ab_test: { dcpp: :show })
 
     fill_in "amount", with: "100"
+
+    expect(page).to have_selector("#dcpp")
+    expect(page).to_not have_selector("#nudge")
+
     click_on "Go to Checkout"
 
     abtcc = AbTestContributionConversion.last
@@ -19,16 +23,20 @@ feature "Conversion Metrics" do
   scenario "Completes a donation" do
     project = create(:project)
 
-    # visit new_project_contribution_path(project_id: project.id, ab_test: { nudge: :show })
-    visit new_project_contribution_path(project_id: project.id)
+    visit new_project_contribution_path(project_id: project.id, ab_test: { dcpp: :show })
 
     fill_in "amount", with: "100"
+
+    expect(page).to have_selector("#dcpp")
+    expect(page).to_not have_selector("#nudge")
+
     click_on "Go to Checkout"
     click_on "Donate"
 
     abtcc = AbTestContributionConversion.last
     expect(abtcc.project).to eq(project)
     expect(abtcc.contribution).to eq(Contribution.last)
+    expect(abtcc.ab_test_name).to eq("dcpp")
     expect(abtcc.metadata["page_views"].count).to eq(1)
     expect(abtcc.status).to eq("fulfilled")
   end
@@ -36,51 +44,49 @@ feature "Conversion Metrics" do
   scenario "Starts a donation twice" do
     project = create(:project)
 
-    visit new_project_contribution_path(project_id: project.id)
+    visit new_project_contribution_path(project_id: project.id, ab_test: { dcpp: :show })
+
+    abtcc_1 = AbTestContributionConversion.last
+    expect(page).to have_selector("#dcpp")
+    expect(page).to_not have_selector("#nudge")
+
     visit new_project_contribution_path(project_id: project.id)
 
-    fill_in "amount", with: "100"
-    click_on "Go to Checkout"
-    click_on "Donate"
+    abtcc_2 = AbTestContributionConversion.last
+    expect(page).to have_selector("#dcpp")
+    expect(page).to_not have_selector("#nudge")
 
-    abtcc = AbTestContributionConversion.last
-    expect(abtcc.project).to eq(project)
-    expect(abtcc.contribution).to eq(Contribution.last)
-    expect(abtcc.metadata["page_views"].count).to eq(2)
-    expect(abtcc.status).to eq("fulfilled")
+    expect(abtcc_1).to eq(abtcc_2)
   end
 
   scenario "Starts a donation for another campaign" do
     project_1 = create(:project)
     project_2 = create(:project)
 
-    visit new_project_contribution_path(project_id: project_1.id)
+    visit new_project_contribution_path(project_id: project_1.id, ab_test: { dcpp: :show })
+    expect(page).to have_selector("#dcpp")
+    expect(page).to_not have_selector("#nudge")
+
     abtcc_1 = AbTestContributionConversion.last
     expect(abtcc_1.project).to eq(project_1)
     expect(abtcc_1.metadata["page_views"].count).to eq(1)
     expect(abtcc_1.status).to eq("unfulfilled")
 
     visit new_project_contribution_path(project_id: project_2.id)
-
-    fill_in "amount", with: "100"
-    click_on "Go to Checkout"
-    click_on "Donate"
-
-    expect(abtcc_1.project).to eq(project_1)
-    expect(abtcc_1.metadata["page_views"].count).to eq(1)
-    expect(abtcc_1.status).to eq("unfulfilled")
+    expect(page).to have_selector("#dcpp")
+    expect(page).to_not have_selector("#nudge")
 
     abtcc_2 = AbTestContributionConversion.last
     expect(abtcc_2.project).to eq(project_2)
     expect(abtcc_2.metadata["page_views"].count).to eq(1)
-    expect(abtcc_2.status).to eq("fulfilled")
+    expect(abtcc_2.status).to eq("unfulfilled")
   end
 
   scenario "Starts a donation while logged out and completes after log in" do
     project = create(:project)
     user = create(:user)
 
-    visit new_project_contribution_path(project_id: project.id)
+    visit new_project_contribution_path(project_id: project.id, ab_test: { dcpp: :show })
 
     abtcc = AbTestContributionConversion.last
     expect(abtcc.project).to eq(project)
@@ -116,7 +122,7 @@ feature "Conversion Metrics" do
     fill_in "user[password]", with: "Testing123%"
     click_on "Log in"
 
-    visit new_project_contribution_path(project_id: project.id)
+    visit new_project_contribution_path(project_id: project.id, ab_test: { dcpp: :show })
 
     abtcc = AbTestContributionConversion.last
     expect(abtcc.project).to eq(project)
@@ -150,7 +156,7 @@ feature "Conversion Metrics" do
     fill_in "user[password]", with: "Testing123%"
     click_on "Log in"
 
-    visit new_project_contribution_path(project_id: project.id)
+    visit new_project_contribution_path(project_id: project.id, ab_test: { dcpp: :show })
 
     abtcc_1 = AbTestContributionConversion.last
     expect(abtcc_1.project).to eq(project)
@@ -188,7 +194,7 @@ feature "Conversion Metrics" do
     fill_in "user[password]", with: "Testing123%"
     click_on "Log in"
 
-    visit new_project_contribution_path(project_id: project.id)
+    visit new_project_contribution_path(project_id: project.id, ab_test: { dcpp: :show })
 
     fill_in "amount", with: "100"
     click_on "Go to Checkout"
