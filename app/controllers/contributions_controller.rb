@@ -7,6 +7,8 @@ class ContributionsController < ApplicationController
   def create
     @contribution = Contribution.new(contribution_params)
     if @contribution.save
+      debugger
+      finish_tests
       redirect_to edit_project_contribution_path(project_id: params[:project_id], id: @contribution.id)
     else
       render 'new'
@@ -24,7 +26,6 @@ class ContributionsController < ApplicationController
   def update
     @contribution = Contribution.find(params[:id])
     @contribution.update(paid: true)
-    finish_tests
     redirect_to project_contribution_path(project_id: params[:project_id], id: @contribution.id)
   end
 
@@ -34,24 +35,18 @@ class ContributionsController < ApplicationController
     { amount: params[:amount], project_id: params[:project_id] }
   end
 
-  def conflicting_test_names
-    YAML.load_file("config/experiments.yml").dig("conflicts", "contributions") || []
-  end
-
-  def select_from_conflicting_tests
-    params[:ab_test]&.keys&.find { |k| conflicting_test_names.include?(k) } || 
-      active_experiments.keys.find { |k| conflicting_test_names.include?(k) } || 
-      conflicting_test_names.sample
-  end
-
   def start_tests
-    selected_test_name = select_from_conflicting_tests
-    instance_variable_set("@#{selected_test_name}", ab_test(selected_test_name))
+    ab_test(:donor_covered_payment_processing) do |alternative, metadata|
+      @donor_covered_payment_processing = metadata["experience"]
+    end
+    ab_test(:recurring_gift_nudge) do |alternative, metadata|
+      @recurring_gift_nudge = metadata["experience"]
+    end
   end
 
   def finish_tests
-    selected_test_name = select_from_conflicting_tests
-    ab_finished(selected_test_name, reset: true)
+    ab_finished(:donor_covered_payment_processing, reset: true)
+    ab_finished(:recurring_gift_nudge, reset: true)
   end
 
   # This is a hook for Split gem. https://github.com/splitrb/split
@@ -65,21 +60,26 @@ class ContributionsController < ApplicationController
   end
 
   def create_ab_test_contribution_conversion(trial)
-    abtcc = find_ab_test_contribution_conversion(trial)
+    abtcc = find_ab_test_contribution_conversion
 
     if abtcc.blank?
       abtcc = AbTestContributionConversion.new(
         user: current_user,
         session_id: session["split"]["id"],
         project_id: params[:project_id],
-        ab_test_name: trial.experiment.name,
-        ab_test_variant: trial.alternative.name,
-        ab_test_version: trial.experiment.version,
         status: "unfulfilled",
-        metadata: { page_views: [] }
+        metadata: { page_views: [], features: {} }
       )
     elsif abtcc.user.blank?
       abtcc.user = current_user
+    end
+
+    if abtcc.metadata["features"][trial.experiment.name].blank?
+      abtcc.metadata["features"][trial.experiment.name] = {
+        "setting" => "xx_test",
+        "version" => trial.experiment.version,
+        **trial.metadata
+      }
     end
 
     abtcc.metadata["page_views"] << Time.now
@@ -87,25 +87,26 @@ class ContributionsController < ApplicationController
   end
 
   def complete_ab_test_contribution_conversion(trial)
-    abtcc = find_ab_test_contribution_conversion(trial)
+    abtcc = find_ab_test_contribution_conversion
 
+    debugger
+
+    return if abtcc.fulfilled?
+
+    abtcc.metadata["features"]["donor_covered_payment_processing"]["result"] = params[:donor_covered_payment_processing] == "1" if params[:donor_covered_payment_processing].present?
+    abtcc.metadata["features"]["recurring_gift_nudge"]["result"] = params[:recurring_gift_nudge] == "1" if params[:recurring_gift_nudge].present?
     abtcc.assign_attributes(contribution: @contribution, status: "fulfilled")
     abtcc.assign_attributes(user: current_user) if current_user.present?
+
     abtcc.save!
   end
 
-  def find_ab_test_contribution_conversion(trial)
-    abtcc = if current_user.present? 
-      AbTestContributionConversion.matches_user_or_no_user(current_user)
-    else
-      AbTestContributionConversion
-    end
-
-    abtcc.where(session_id: session["split"]["id"], project_id: params[:project_id])
-         .where(ab_test_name: trial.experiment.name, ab_test_variant: trial.alternative.name, ab_test_version: trial.experiment.version)
-         .unfulfilled
-         .not_expired
-         .latest
-         .first
+  def find_ab_test_contribution_conversion
+    AbTestContributionConversion
+      .where(session_id: session["split"]["id"], project_id: params[:project_id])
+      .and(AbTestContributionConversion.unfulfilled.not_expired)
+      .or(AbTestContributionConversion.fulfilled.where("updated_at >= ?", 5.seconds.ago))
+      .latest
+      .first
   end
 end

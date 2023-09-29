@@ -6,14 +6,14 @@
       <%= f.label :amount %>
       <%= f.number_field :amount, class: 'mb-1 form-control' %>
 
-      <% if @dcpp == "show" %>
-        <%= f.check_box :dcpp, class: 'mb-1 form-control' %>
-        <%= f.label :dcpp, "Would you like to pay an additional 1% to cover the fees?" %>
+      <% if @donor_covered_payment_processing == "show" %>
+        <%= f.check_box :donor_covered_payment_processing, class: 'mb-1 form-control' %>
+        <%= f.label :donor_covered_payment_processing, "Would you like to pay an additional 1% to cover the fees?" %>
       <% end %>
 
-      <% if @nudge == "show" %>
-        <%= f.check_box :nudge, class: 'mb-1 form-control' %>
-        <%= f.label :nudge, "Would you like to make your gift recurring?" %>
+      <% if @recurring_gift_nudge == "show" %>
+        <%= f.check_box :recurring_gift_nudge, class: 'mb-1 form-control' %>
+        <%= f.label :recurring_gift_nudge, "Would you like to make your gift recurring?" %>
       <% end %>
 
       <%= f.submit "Go to Checkout", class: "mt-2 btn btn-primary" %>
